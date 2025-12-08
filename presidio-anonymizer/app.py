@@ -108,13 +108,13 @@ class Server:
                 "description": "Example output of the genz anonymizer."
             })
 
-        @self.app.route("/genz")
-        def genz():
+        @self.app.route("/genz", methods=["POST"])
+        def genz() -> Response:
             engine = AnonymizerEngine()
 
             result = engine.anonymize(
                 text="Please contact Emily Carter at 734-555-9284 if you" \
-                "have questions about the workshop registration.",
+                " have questions about the workshop registration.",
                 analyzer_results=[
                     RecognizerResult(entity_type="PERSON",
                                      start=15,
@@ -128,8 +128,7 @@ class Server:
                 operators={"PERSON": OperatorConfig("genz", None),
                            "PHONE_NUMBER" : OperatorConfig("genz", None)},
             )
-
-            return result.to_json()
+            return Response(result.to_json(), mimetype="application/json")
         ###
 
         @self.app.errorhandler(InvalidParamError)
