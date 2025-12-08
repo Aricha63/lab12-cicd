@@ -108,7 +108,7 @@ class Server:
                 "description": "Example output of the genz anonymizer."
             })
 
-        @self.app.route("/genz", methods=["GET"])
+        @self.app.route("/genz")
         def genz():
             engine = AnonymizerEngine()
 
