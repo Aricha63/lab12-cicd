@@ -7,7 +7,7 @@ from pathlib import Path
 
 from flask import Flask, Response, jsonify, request
 from presidio_anonymizer import AnonymizerEngine, DeanonymizeEngine
-from presidio_anonymizer.entities import InvalidParamError
+from presidio_anonymizer.entities import InvalidParamError,  RecognizerResult, OperatorConfig
 from presidio_anonymizer.services.app_entities_convertor import AppEntitiesConvertor
 from werkzeug.exceptions import BadRequest, HTTPException
 
@@ -102,6 +102,21 @@ class Server:
         def genz_preview():
             """Return an example of genz-anonymization"""
             return jsonify({"example": "Call Emily at 577-988-1234", "example output": "Call GOAT at vibe check", "description": "Example output of the genz anonymizer."})
+        
+        @self.app.route("/genz", methods=["GET"])
+        def genz():
+            engine = AnonymizerEngine()
+
+            result = engine.anonymize(
+                text="Please contact Emily Carter at 734-555-9284 if you have questions about the workshop registration.",
+                analyzer_results=[
+                    RecognizerResult(entity_type="PERSON", start=15, end=27, score=0.3),
+                    RecognizerResult(entity_type="PHONE_NUMBER", start=31, end=43, score=0.95),
+                ],
+                operators={"PERSON": OperatorConfig("genz", None), "PHONE_NUMBER" : OperatorConfig("genz", None)},
+            )
+
+            return result.to_json()
         ###
 
         @self.app.errorhandler(InvalidParamError)
